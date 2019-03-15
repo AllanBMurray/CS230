@@ -74,6 +74,7 @@ for (trhl = 0; trhl < myTable.rows.length; trhl++){
   console.log(myTable.rows[selCell.rowIndex].cells[0].innerHTML);
   console.log(selCell);
   document.getElementById("updateid").value = myTable.rows[selCell.rowIndex].cells[0].innerHTML;
+  document.getElementById("deleteid").value = myTable.rows[selCell.rowIndex].cells[0].innerHTML;
 }
 
 function deselectCells(){
@@ -96,8 +97,8 @@ function deselectCells(){
 
 
   <h1>CS230 Lab05 - Allan Murray</h1>
-
-  <p>Version 2.0</p>
+  <hr>
+  <h2>Create Section</h2>
   <button onclick="selectRow()">Test Button</button>
  <?php
 ?>
@@ -212,6 +213,8 @@ if(isset($_POST['addBook'])){
   echo "<br>";
   echo $description;
   echo "<br>";
+  
+
 }
     function test_input($data) {
       $data = trim($data);
@@ -219,18 +222,17 @@ if(isset($_POST['addBook'])){
       $data = htmlspecialchars($data);
       return ("'$data'"); //adds single quotations for database entry.
     }
-?>
 
+?>
+<hr>
 <h2>Update Section</h2>
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 Update ID: <input type="text" name="updateid" id="updateid"><br>
 <input type="submit" class="button-style" name="updateBook" id="updateBook" value="Update Book Information"><br>
 <!--<p id="updateid"></p>-->
 </form><br>
+<div><br>
 <?php
-  //$creator = $title = $type = $identifier = $language = $description = "";
-  //$updateid = 0;
-  //$date = date('m/d/Y');
   if(isset($_POST['updateBook'])){
     if ($_SERVER["REQUEST_METHOD"] == "POST"){
       $updateid = ($_POST["updateid"]);
@@ -241,7 +243,7 @@ Update ID: <input type="text" name="updateid" id="updateid"><br>
           parent::__construct($it, self::LEAVES_ONLY);
         }
         function current() {
-          return "<td style='width:150px;border:1px solid black;'>" . parent::current(). "</td>";
+          return "<td contenteditable='true' style='width:150px;border:1px solid black;'>" . parent::current(). "</td>";
         }
         function beginChildren() {
           echo "<tr>";
@@ -270,6 +272,97 @@ Update ID: <input type="text" name="updateid" id="updateid"><br>
       }
       $conn = null;
       echo "</table>";
+      echo '<form method="post" action="/CS230Lab05.php">';
+      echo '<input type="submit" class="button-style" name="addUpdatedBook" id="addUpdatedBook" value="Amend Book Information and Then Press This Button"><br>';
+      echo '</form><br>';
+    }
+  }
+if(isset($_POST['addUpdatedBook'])){
+  if ($_SERVER["REQUEST_METHOD"] == "POST"){
+    $uid = ($_POST["uid"]); 
+    $ucreator = ($_POST["ucreator"]); 
+    $utitle = ($_POST["utitle"]); 
+    $utype = ($_POST["utype"]); 
+    $uidentifier = ($_POST["uidentifier"]); 
+    $udate = ($_POST["udate"]); 
+    $ulanguage = ($_POST["ulanguage"]);  
+    $udescription = ($_POST["udescription"]);
+    $uservername = "localhost";
+    $uusername = "root";
+    $upassword = "";
+    $udbname = "mysql";
+    echo "Hello World";
+    /*try {
+      $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,     $password);
+      // set the PDO error mode to exception
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $sql = "INSERT INTO eBook_MetaData (creator, title, type, identifier, date, language, description)
+      VALUES ($creator, $title, $type, $identifier, $date, $language, $description)";
+      // use exec() because no results are returned
+      $conn->exec($sql);
+      echo "New record created successfully";
+    }
+    catch(PDOException $e){
+      echo $sql . "<br>" . $e->getMessage();
+    }
+    $conn = null;*/
+  }
+	
+  }
+?></div>
+
+<hr>
+<h2>Delete Section</h2>
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+Delete ID: <input type="text" name="deleteid" id="deleteid"><br>
+<input type="submit" class="button-style" name="deleteBook" id="deleteBook" value="Delete Book Information"><br>
+<!--<p id="updateid"></p>-->
+</form><br>
+
+<?php
+    if(isset($_POST['deleteBook'])){
+      if ($_SERVER["REQUEST_METHOD"] == "POST"){
+        $deleteid = ($_POST["deleteid"]);
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "mysql";
+
+	try {
+	    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+	    // set the PDO error mode to exception
+	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+	    // sql to delete a record
+	    $sql = "DELETE FROM eBook_MetaData WHERE id = $deleteid";
+
+	    // use exec() because no results are returned
+	    $conn->exec($sql);
+	    echo "Record deleted successfully";
+	    }
+	catch(PDOException $e)
+	    {
+	    echo $sql . "<br>" . $e->getMessage();
+	    }
+
+	$conn = null;
+/*
+      try {
+        $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $conn->prepare("DELETE * FROM eBook_MetaData WHERE id = $deleteid");
+        $stmt->execute();
+        // set the resulting array to associative
+        $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        foreach(new updateTableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+          echo $v;
+        }
+      }
+      catch(PDOException $e) {
+          echo "Error: " . $e->getMessage();
+      }
+      $conn = null;
+      echo "</table>";*/
     }
   }
 ?>
