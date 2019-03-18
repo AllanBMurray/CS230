@@ -89,8 +89,19 @@ function deselectCells(){
   cellToDelete = 0;
 }
 
-//selectColumn(); //react to any columns or rows being selected.
-
+//function to move contents of the row in the update section to hidden form prior to POST.
+function populate(){
+  console.log("populate function");
+  myTable = document.getElementById('myUpdate');
+  document.getElementById('uid').value = myUpdate.rows[1].cells[0].innerHTML;
+  document.getElementById('ucreator').value = myUpdate.rows[1].cells[1].innerHTML;
+  document.getElementById('utitle').value = myUpdate.rows[1].cells[2].innerHTML;
+  document.getElementById('utype').value = myUpdate.rows[1].cells[3].innerHTML;
+  document.getElementById('uidentifier').value = myUpdate.rows[1].cells[4].innerHTML;
+  document.getElementById('udate').value = myUpdate.rows[1].cells[5].innerHTML;
+  document.getElementById('ulanguage').value = myUpdate.rows[1].cells[6].innerHTML;
+  document.getElementById('udescription').value = myUpdate.rows[1].cells[7].innerHTML;
+}
 </script>
 </head>
 <body>
@@ -100,7 +111,8 @@ function deselectCells(){
   <hr>
   <h2>Create Section</h2>
   <button onclick="selectRow()">Test Button</button>
- <?php
+ 
+ <?php // unset($_POST);
 ?>
 
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
@@ -196,6 +208,7 @@ if(isset($_POST['addBook'])){
   
 	
   }
+  /*
   echo"<h2>Input values:</h2>";
   echo $id;
   echo "<br>";
@@ -213,7 +226,12 @@ if(isset($_POST['addBook'])){
   echo "<br>";
   echo $description;
   echo "<br>";
-  
+  */
+  //this code re-directs to user to the page in order to clear POST information and
+  //display current table.
+  echo '<script type="text/javascript">
+          window.location = window.location.href
+        </script>';
 
 }
     function test_input($data) {
@@ -273,7 +291,15 @@ Update ID: <input type="text" name="updateid" id="updateid"><br>
       $conn = null;
       echo "</table>";
       echo '<form method="post" action="/CS230Lab05.php">';
-      echo '<input type="submit" class="button-style" name="addUpdatedBook" id="addUpdatedBook" value="Amend Book Information and Then Press This Button"><br>';
+      echo '<input type="hidden" id="uid" name ="uid" value="test">';
+      echo '<input type="hidden" id="ucreator" name ="ucreator" value="testvalue">';
+      echo '<input type="hidden" id="utitle" name ="utitle" value="testvalue">';
+      echo '<input type="hidden" id="utype" name ="utype" value="testvalue">';
+      echo '<input type="hidden" id="uidentifier" name ="uidentifier" value="testvalue">';
+      echo '<input type="hidden" id="udate" name ="udate" value="testvalue">';
+      echo '<input type="hidden" id="ulanguage" name ="ulanguage" value="testvalue">';
+      echo '<input type="hidden" id="udescription" name ="udescription" value="testvalue">';
+      echo '<input type="submit" class="button-style" name="addUpdatedBook" id="addUpdatedBook" onclick="populate()" value="Amend Book Information and Then Press This Button"><br>';
       echo '</form><br>';
     }
   }
@@ -292,12 +318,13 @@ if(isset($_POST['addUpdatedBook'])){
     $upassword = "";
     $udbname = "mysql";
     echo "Hello World";
-    /*try {
+    /*UPDATE `eBook_MetaData` SET `description` = 'A book.hghgh' WHERE `eBook_MetaData`.`id` = 48 */
+    try {
       $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,     $password);
       // set the PDO error mode to exception
       $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $sql = "INSERT INTO eBook_MetaData (creator, title, type, identifier, date, language, description)
-      VALUES ($creator, $title, $type, $identifier, $date, $language, $description)";
+      $sql = "UPDATE eBook_MetaData SET creator = '$ucreator', title = '$utitle', type = '$utype', identifier = '$uidentifier', date = '$udate', language = '$ulanguage', description = '$udescription'
+      WHERE id = $uid";
       // use exec() because no results are returned
       $conn->exec($sql);
       echo "New record created successfully";
@@ -305,7 +332,13 @@ if(isset($_POST['addUpdatedBook'])){
     catch(PDOException $e){
       echo $sql . "<br>" . $e->getMessage();
     }
-    $conn = null;*/
+    $conn = null;
+
+    //this code re-directs to user to the page in order to clear POST information and
+    //display current table.
+    echo '<script type="text/javascript">
+    window.location = window.location.href
+  </script>';
   }
 	
   }
@@ -316,53 +349,40 @@ if(isset($_POST['addUpdatedBook'])){
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 Delete ID: <input type="text" name="deleteid" id="deleteid"><br>
 <input type="submit" class="button-style" name="deleteBook" id="deleteBook" value="Delete Book Information"><br>
-<!--<p id="updateid"></p>-->
 </form><br>
 
 <?php
-    if(isset($_POST['deleteBook'])){
-      if ($_SERVER["REQUEST_METHOD"] == "POST"){
-        $deleteid = ($_POST["deleteid"]);
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "mysql";
+  if(isset($_POST['deleteBook'])){
+    if ($_SERVER["REQUEST_METHOD"] == "POST"){
+      $deleteid = ($_POST["deleteid"]);
+      $servername = "localhost";
+      $username = "root";
+      $password = "";
+      $dbname = "mysql";
 
-	try {
-	    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-	    // set the PDO error mode to exception
-	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-	    // sql to delete a record
-	    $sql = "DELETE FROM eBook_MetaData WHERE id = $deleteid";
-
-	    // use exec() because no results are returned
-	    $conn->exec($sql);
-	    echo "Record deleted successfully";
-	    }
-	catch(PDOException $e)
-	    {
-	    echo $sql . "<br>" . $e->getMessage();
-	    }
-
-	$conn = null;
-/*
       try {
         $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+        // set the PDO error mode to exception
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $conn->prepare("DELETE * FROM eBook_MetaData WHERE id = $deleteid");
-        $stmt->execute();
-        // set the resulting array to associative
-        $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        foreach(new updateTableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
-          echo $v;
-        }
+
+        // sql to delete a record
+        $sql = "DELETE FROM eBook_MetaData WHERE id = $deleteid";
+
+        // use exec() because no results are returned
+        $conn->exec($sql);
+        echo "Record deleted successfully";
       }
-      catch(PDOException $e) {
-          echo "Error: " . $e->getMessage();
+      catch(PDOException $e){
+        echo $sql . "<br>" . $e->getMessage();
       }
+
       $conn = null;
-      echo "</table>";*/
+
+      //this code re-directs to user to the page in order to clear POST information and
+      //display current table.
+      echo '<script type="text/javascript">
+              window.location = window.location.href
+            </script>';
     }
   }
 ?>
