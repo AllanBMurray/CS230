@@ -1,0 +1,259 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Assignment 5 - CS230 - Allan Murray</title>
+<style type="text/css">
+
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-ia0a{font-weight:bold;background-color:#c0c0c0;color:#000000;text-align:left}
+.tg .tg-5nd3{background-color:#c0c0c0;color:#000000;text-align:left}
+
+#div-record {
+  background-color: lightgrey;
+  width: 600px;
+  border: 15px solid green;
+  padding: 20px;
+  margin: 10px;
+}
+
+#editRecord {
+  background-color: lightgrey;
+  width: 600px;
+  border: 15px solid blue;
+  padding: 20px;
+  margin: 10px;
+}
+
+#container {
+  background-color: lightgrey;
+  width: 600px;
+  border: 15px solid yellow;
+  padding: 20px;
+  margin: 10px;
+}
+
+#delete {
+  background-color: lightgrey;
+  width: 600px;
+  border: 15px solid red;
+  padding: 20px;
+  margin: 10px;
+}
+
+#submission {
+  background-color: lightgrey;
+  width: 600px;
+  border: 15px solid purple;
+  padding: 20px;
+  margin: 10px;
+}
+</style>
+  </head>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+</script>
+
+<script>
+var jsObj = [];
+//ajax code to submit data adapted from https://stackoverflow.com/questions/20226169/how-to-pass-json-post-data-to-web-api-method-as-an-object
+//reused below in other functions.
+function submitRecord(){
+	console.log("subRecord");
+        
+	var datejs = new Date();
+	var dd = datejs.getDate();
+	var mm = datejs.getMonth() + 1; //January is 0!
+	var yyyy = datejs.getFullYear();
+	if (dd < 10) {
+	  dd = '0' + dd;
+	} 
+	if (mm < 10) {
+	  mm = '0' + mm;
+	} 
+	var datejs = yyyy + '-' + mm + '-' + dd;
+	console.log(datejs);
+  	var URLjs = document.getElementById("URL").value;
+  	var descriptionjs = document.getElementById("description").value;
+  	var snamejs = document.getElementById("sname").value;
+        console.log(document.getElementById("URL").value+"  URL");
+        console.log(document.getElementById("sname").value+" sname");
+        console.log(snamejs+"  snamejs");
+	$(function () {
+	    var customer = {theDate: datejs, name: snamejs, URL: URLjs, description: descriptionjs};
+	    $.ajax({
+		type: "POST",
+		data :JSON.stringify(customer),
+		url: "../service/service.php/ReadingListTable",
+		contentType: "application/json"
+	    });
+	});
+	//reset submit form.
+        document.getElementById("URL").value = "";
+  	document.getElementById("description").value = "";
+  	document.getElementById("sname").value = "";
+}
+
+function editRecord(){
+	console.log("editRecord");
+	var eIDjs = jsObj.ID;      
+	var edatejs = jsObj.theDate;
+  	var eURLjs = document.getElementById("eURL").value;
+  	var edescriptionjs = document.getElementById("edescription").value;
+  	var enamejs = document.getElementById("ename").value;
+	$(function () {
+	    var customer = {theDate: edatejs, name: enamejs, URL: eURLjs, description: edescriptionjs};
+	    $.ajax({
+		type: "PUT",
+		data :JSON.stringify(customer),
+		url: "../service/service.php/ReadingListTable/"+eIDjs+"/0/",
+		contentType: "application/json"
+	    });
+	});
+        //reset edit form.
+        document.getElementById("eURL").value = "";
+  	document.getElementById("edescription").value = "";
+  	document.getElementById("ename").value = "";
+}
+
+//get record by ID.
+function getRecord(){
+  var IDindex = document.getElementById("ID").value;
+  if (IDindex == ""){
+  //no number in search box -> reset display, hide edit form and return.
+  $("#editRecord").hide();
+  document.getElementById("displayName").innerHTML = "Name:";
+  document.getElementById("displayID").innerHTML = "ID:";
+  document.getElementById("displayDate").innerHTML = "Date:";
+  document.getElementById("displayURL").innerHTML = "URL:";
+  document.getElementById("displayDescription").innerHTML = "Description:";
+  return;
+  }
+  $("#editRecord").show();
+  console.log("getRecord");
+  console.log(IDindex);
+  $(document).ready(function(){
+    //$("button").click(function(){
+      $.get("../service/service.php/ReadingListTable/"+IDindex+"/0/", function(data, status){
+	if (data != "")
+        {
+          jsObj = JSON.parse(data);
+        }
+        else
+        {
+	  jsObj = [];
+	}
+	if (jsObj.length === 0){
+	  $("#editRecord").hide();
+	  alert("There is no record with this ID.");
+	}
+	else{
+	  document.getElementById("displayName").innerHTML = "Name: "+jsObj.name;
+	  document.getElementById("displayID").innerHTML = "ID: "+jsObj.ID;
+	  document.getElementById("displayDate").innerHTML = "Date: "+jsObj.theDate;
+	  document.getElementById("displayURL").innerHTML = "URL: " +jsObj.URL;
+	  document.getElementById("displayDescription").innerHTML = "Description: " +jsObj.description;
+	  document.getElementById("eID").innerHTML = "Edit Record with ID: "+jsObj.ID;	
+	  document.getElementById("eURL").value = jsObj.URL;
+	  document.getElementById("ename").value = jsObj.name;
+	  document.getElementById("edescription").value = jsObj.description;
+       }
+	//$("#options").html(data);
+     });
+  });
+}
+
+function getRecordByName(){
+  var getName = document.getElementById("searchname").value;
+  console.log("getRecordByName");
+  console.log(getName);
+  $("#container").show();
+  $(document).ready(function(){
+    //$("button").click(function(){
+      $.get("../service/service.php/ReadingListTable/0/"+getName+"/", function(data, status){
+	var jsObj2 = JSON.parse(data);
+	var str = "<h3>Search By Name Results</h3><table class='tg'><tr><th class='tg-ia0a'>ID</th><th class='tg-ia0a'>NAME</th><th class='tg-ia0a'>DATE</th><th class='tg-ia0a'>URL</th><th class='tg-ia0a'>DESCRIPTION</th></tr>"+jsObj2.map(function(item){ 
+    	for (var key in item)
+        //return "ID: " + item.ID + "    Name: " + item.name +"     Date: " + item.theDate + "    URL: " + item.URL + "    Description: " + item.description + "<br>";
+//}).join(" ");
+	return "<tr><th class='tg-5nd3'>"+item.ID +"</th><th class='tg-5nd3'>"+item.name +"</th><th class='tg-5nd3'>"+item.theDate +"</th><th class='tg-5nd3'>"+item.URL +"</th><th class='tg-5nd3'>"+item.description +"</th></tr>";});
+	var str = str + "</table>";
+	document.getElementById('container').innerHTML = str;
+       });
+  });
+
+}
+
+function delRecord(){
+  var delIDindex = document.getElementById("delID").value;
+  console.log("delRecord");
+  console.log(delID);
+  $(document).ready(function(){
+    $(function () {
+        $.ajax({
+	    type: "DELETE",
+	    url: "../service/service.php/ReadingListTable/"+delIDindex+"/",
+	    //contentType: "application/json"
+        });
+    });
+  });
+  document.getElementById("delID").value = "";
+}
+</script>
+  <body>
+   <h1 id="title">Reading List - RESTful API</h1>
+    <form>
+	Search by ID: <input type="text" name="ID" id="ID"><br>
+      <input type="button" class="submit" name="getRec" id="getRec" value="Search Database" onclick="getRecord()"><br>
+    </form><br>
+    <div id="div-record">
+        <h3>Search By ID Result</h3>
+	<p id="displayName">Name:</p>
+	<p id="displayID">ID:</p>
+	<p id="displayDate">Date:</p>
+	<p id="displayURL">URL:</p>
+	<p id="displayDescription">Description:</p>
+     </div>
+     <div id="editRecord" style="display: none;">
+     <form>
+        <h3 name="eID" id="eID"></h3>
+	URL: <input type="text" name="eURL" id="eURL"><br>
+	Name: <input type="test" name="ename" id="ename"><br>
+        Description: <input type="test" name="edescription" id="edescription"><br>
+        <input type="hidden" name="edate" id="edate"><br>
+      <input type="button" class="submit" name="ediRec" id="ediRec" value="Edit Record" onclick="editRecord()"><br>
+    </form><br>
+    </div>
+
+    <form>
+	Search by Name: <input type="text" name="searchname" id="searchname"><em> (Leave search box empty to return all records)<br>
+      <input type="button" class="submit" name="getRecByName" id="getRecByName" value="Search Database" onclick="getRecordByName()"><br>
+    </form><br>
+
+     <div id='container' style="display: none;"></div>
+
+     <div id='submission'>
+     <form>
+        <h3>New Record Submission</h3>
+	URL: <input type="text" name="URL" id="URL"><br>
+	Name: <input type="test" name="sname" id="sname"><br>
+        Description: <input type="test" name="description" id="description"><br>
+      <input type="button" class="submit" name="subRec" id="subRec" value="New Record" onclick="submitRecord()"><br>
+    </form><br>
+    </div>
+
+    <div id='delete'>
+    <form>
+      <h3>Delete Record</h3>
+	ID: <input type="text" name="delID" id="delID"><br>
+      <input type="button" class="submit" name="delRec" id="delRec" value="Delete Record by ID" onclick="delRecord()"><br>
+    </form><br>
+    </div>
+
+    <div class="acknol" id="acknol">
+      Acknowledgements:<br>
+      <a href=" https://www.leaseweb.com/labs/2015/10/creating-a-simple-rest-api-in-php/"><b>Service code based on:</b>  https://www.leaseweb.com/labs/2015/10/creating-a-simple-rest-api-in-php/</a><br>
+      <a href=" https://stackoverflow.com/questions/20226169/how-to-pass-json-post-data-to-web-api-method-as-an-object"><b>Send data with Ajax snippet base on:</b>  https://stackoverflow.com/questions/20226169/how-to-pass-json-post-data-to-web-api-method-as-an-object</a>
+    </div>
+  </body>
+</html>
